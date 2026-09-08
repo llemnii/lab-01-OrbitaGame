@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111318" />
+    <title>Орбіта — гра на Canvas</title>
+    <style>
+      :root {
+        color: #eeeeee;
+        background: #111318;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        font-synthesis: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        background: #111318;
+      }
+      .game {
+        width: min(1000px, 100%);
+        margin: 0 auto;
+        padding: 18px 12px;
+      }
+      .topbar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 22px;
+        margin-bottom: 14px;
+      }
+      .eyebrow {
+        margin: 0 0 7px;
+        color: #9aa3b2;
+        font-size: 13px;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 5vw, 44px);
+        line-height: 1;
+      }
+      .subtitle {
+        max-width: 520px;
+        margin: 10px 0 0;
+        color: #b2b6c0;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .hud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .hud div {
+        min-width: 88px;
+        padding: 8px 10px;
+        border: 1px solid #3a3f49;
+        border-radius: 4px;
+        background: #191c22;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .hud span {
+        display: block;
+        margin-top: 5px;
+        color: #f0c674;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+      .arena-shell {
+        position: relative;
+        padding: 4px;
+        border: 1px solid #3a3f49;
+        border-radius: 5px;
+        background: #191c22;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        height: min(82vh, 760px);
+        min-height: 420px;
+        border: 1px solid #4b5260;
+        border-radius: 2px;
+        background: #080a0d;
+      }
+      .bottom-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-top: 12px;
+      }
+      .help {
+        margin: 0;
+        color: #c3c6cc;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .tip {
+        margin: 0;
+        color: #9aa3b2;
+        font-size: 13px;
+        text-align: left;
+      }
+      kbd {
+        padding: 2px 5px;
+        border: 1px solid #5a6372;
+        border-radius: 3px;
+        color: #eeeeee;
+        background: #252a32;
+        font-family: inherit;
+        font-size: 12px;
+        box-shadow: 0 2px 0 #0a122a;
+      }
+      @media (max-width: 760px) {
+        .topbar,
+        .bottom-bar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .hud {
+          justify-content: flex-start;
+        }
+        .tip {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="game">
+      <header class="topbar">
+        <section class="hud" aria-label="Показники гри">
+          <div>КАДРІВ/С <span id="fps">0</span></div>
+          <div>КРОКІВ/С <span id="steps">0</span></div>
+          <div>ЧАС КАДРУ <span id="frame-time">0 мс</span></div>
+        </section>
+      </header>
+      <div class="arena-shell">
+        <canvas id="game-canvas" aria-label="Ігрова арена"></canvas>
+      </div>
+      <div class="bottom-bar">
+        <p class="help">
+          Керування: <kbd>W</kbd>/<kbd>↑</kbd> вперед, <kbd>S</kbd>/<kbd>↓</kbd> назад,
+          <kbd>A</kbd>/<kbd>←</kbd> і <kbd>D</kbd>/<kbd>→</kbd>, поворот.
+        </p>
+        <p class="tip">
+          За край арени можна не переживати, корабель з'явиться з іншого боку.
+        </p>
+      </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
