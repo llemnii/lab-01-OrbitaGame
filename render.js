@@ -9,7 +9,6 @@ export function resizeCanvas(canvas) {
 
   const context = canvas.getContext("2d");
   context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-
   return { width, height };
 }
 
@@ -25,13 +24,95 @@ export function createRenderer(canvas) {
     });
   }
 
-  function render(ship, alpha) {
+  function drawShip(ship, alpha) {
+    const x = ship.previousPos.x + (ship.pos.x - ship.previousPos.x) * alpha;
+    const y = ship.previousPos.y + (ship.pos.y - ship.previousPos.y) * alpha;
+    context.save();
+    context.translate(x, y);
+    context.rotate(ship.angle);
+    if (ship.respawnTimer > 0) context.globalAlpha = 0.35;
+    if (ship.thrusting) {
+      context.fillStyle = "#ffbd69";
+      context.beginPath();
+      context.moveTo(-16, 0);
+      context.lineTo(-28, -6);
+      context.lineTo(-24, 0);
+      context.lineTo(-28, 6);
+      context.closePath();
+      context.fill();
+    }
+    context.shadowColor = "#70e4d4";
+    context.shadowBlur = 16;
+    context.fillStyle = "#d9fffb";
+    context.strokeStyle = "#70e4d4";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(22, 0);
+    context.lineTo(-14, -13);
+    context.lineTo(-9, 0);
+    context.lineTo(-14, 13);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.shadowBlur = 0;
+    context.restore();
+  }
+
+  function drawEntity(entity, alpha) {
+    const x = entity.previousPos.x + (entity.pos.x - entity.previousPos.x) * alpha;
+    const y = entity.previousPos.y + (entity.pos.y - entity.previousPos.y) * alpha;
+    context.save();
+    context.translate(x, y);
+    context.rotate(entity.angle || 0);
+    if (entity.kind === "asteroid") {
+      context.strokeStyle = "#c1a875";
+      context.fillStyle = "rgb(193 168 117 / 18%)";
+      context.lineWidth = 2;
+      context.beginPath();
+      for (let point = 0; point < 8; point += 1) {
+        const angle = (point / 8) * Math.PI * 2;
+        const size = entity.radius * (0.8 + (point % 3) * 0.08);
+        const px = Math.cos(angle) * size;
+        const py = Math.sin(angle) * size;
+        if (point === 0) context.moveTo(px, py);
+        else context.lineTo(px, py);
+      }
+      context.closePath();
+      context.fill();
+      context.stroke();
+    } else if (entity.kind === "bullet") {
+      context.fillStyle = "#ffbd69";
+      context.shadowColor = "#ffbd69";
+      context.shadowBlur = 10;
+      context.fillRect(-4, -2, 8, 4);
+    } else if (entity.kind === "pickup") {
+      context.strokeStyle = entity.type === "shield" ? "#70e4d4" : "#ffbd69";
+      context.lineWidth = 3;
+      context.beginPath();
+      context.arc(0, 0, entity.radius, 0, Math.PI * 2);
+      context.stroke();
+      context.beginPath();
+      context.moveTo(-6, 0);
+      context.lineTo(6, 0);
+      context.moveTo(0, -6);
+      context.lineTo(0, 6);
+      context.stroke();
+    } else if (entity.kind === "explosion") {
+      context.strokeStyle = "#ffbd69";
+      context.globalAlpha = 1 - entity.age / entity.ttl;
+      context.lineWidth = 3;
+      context.beginPath();
+      context.arc(0, 0, entity.radius * (1 + entity.age), 0, Math.PI * 2);
+      context.stroke();
+    }
+    context.restore();
+  }
+
+  function render(world, alpha) {
     const rect = canvas.getBoundingClientRect();
     const width = rect.width || canvas.width;
     const height = rect.height || canvas.height;
     const safeAlpha = Math.max(0, Math.min(1, alpha));
-    const x = ship.previousX + (ship.x - ship.previousX) * safeAlpha;
-    const y = ship.previousY + (ship.y - ship.previousY) * safeAlpha;
 
     context.clearRect(0, 0, width, height);
     const background = context.createLinearGradient(0, 0, 0, height);
@@ -60,38 +141,13 @@ export function createRenderer(canvas) {
       context.globalAlpha = star.size === 2 ? 0.8 : 0.55;
       context.fillRect(star.x * width, star.y * height, star.size, star.size);
     }
-
     context.globalAlpha = 1;
-    context.save();
-    context.translate(x, y);
-    context.rotate(ship.angle);
 
-    if (ship.thrusting) {
-      context.fillStyle = "#ffbd69";
-      context.beginPath();
-      context.moveTo(-16, 0);
-      context.lineTo(-28, -6);
-      context.lineTo(-24, 0);
-      context.lineTo(-28, 6);
-      context.closePath();
-      context.fill();
+    for (const entity of world) {
+      if (!entity.alive && entity.kind !== "ship") continue;
+      if (entity.kind === "ship") drawShip(entity, safeAlpha);
+      else drawEntity(entity, safeAlpha);
     }
-
-    context.shadowColor = "#70e4d4";
-    context.shadowBlur = 16;
-    context.fillStyle = "#d9fffb";
-    context.strokeStyle = "#70e4d4";
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(22, 0);
-    context.lineTo(-14, -13);
-    context.lineTo(-9, 0);
-    context.lineTo(-14, 13);
-    context.closePath();
-    context.fill();
-    context.stroke();
-    context.shadowBlur = 0;
-    context.restore();
   }
 
   return { render };
