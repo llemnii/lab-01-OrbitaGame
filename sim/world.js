@@ -2,10 +2,11 @@ export class World {
   #entities = new Map();
   #pending = [];
 
-  constructor(width, height, input) {
+  constructor(width, height, input, bus = null) {
     this.width = width;
     this.height = height;
     this.input = input;
+    this.bus = bus;
     this.score = 0;
   }
 

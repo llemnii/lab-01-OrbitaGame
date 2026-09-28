@@ -1,0 +1,5 @@
+[
+  { "id": "quiet", "name": "Тиха орбіта", "players": 1, "limit": 4 },
+  { "id": "meteor", "name": "Метеорний дощ", "players": 2, "limit": 4 },
+  { "id": "training", "name": "Тренування", "players": 0, "limit": 2 }
+]

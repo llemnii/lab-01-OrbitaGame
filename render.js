@@ -12,7 +12,7 @@ export function resizeCanvas(canvas) {
   return { width, height };
 }
 
-export function createRenderer(canvas) {
+export function createRenderer(canvas, assets = {}) {
   const context = canvas.getContext("2d");
   const stars = [];
 
@@ -41,6 +41,13 @@ export function createRenderer(canvas) {
       context.closePath();
       context.fill();
     }
+    if (assets.ship) {
+      context.shadowColor = "#70e4d4";
+      context.shadowBlur = 16;
+      context.drawImage(assets.ship, 0, 0, 64, 64, -32, -32, 64, 64);
+      context.restore();
+      return;
+    }
     context.shadowColor = "#70e4d4";
     context.shadowBlur = 16;
     context.fillStyle = "#d9fffb";
@@ -65,6 +72,21 @@ export function createRenderer(canvas) {
     context.translate(x, y);
     context.rotate(entity.angle || 0);
     if (entity.kind === "asteroid") {
+      if (assets.asteroid) {
+        context.drawImage(
+          assets.asteroid,
+          0,
+          0,
+          64,
+          64,
+          -entity.radius,
+          -entity.radius,
+          entity.radius * 2,
+          entity.radius * 2
+        );
+        context.restore();
+        return;
+      }
       context.strokeStyle = "#c1a875";
       context.fillStyle = "rgb(193 168 117 / 18%)";
       context.lineWidth = 2;

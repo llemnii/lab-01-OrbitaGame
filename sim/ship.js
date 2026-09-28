@@ -50,7 +50,9 @@ export class Ship extends Entity {
     this.shieldTime = Math.max(0, this.shieldTime - dt);
     this.rapidTime = Math.max(0, this.rapidTime - dt);
     if ((input.isDown(" ") || input.isDown("f")) && this.fireCooldown <= 0) {
-      world.spawn(this.fire());
+      const bullet = this.fire();
+      world.spawn(bullet);
+      world.bus?.dispatchEvent(new CustomEvent("fired", { detail: { bullet } }));
       this.fireCooldown = this.rapidTime > 0 ? 0.08 : 0.22;
     }
     world.wrap(this);

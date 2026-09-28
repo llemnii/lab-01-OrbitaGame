@@ -1,0 +1,13 @@
+{
+  "ship": { "type": "image", "url": "/assets/ship.svg" },
+  "asteroid": { "type": "image", "url": "/assets/asteroid.svg" },
+  "rooms": { "type": "json", "url": "/api/rooms" },
+  "shot": {
+    "type": "audio",
+    "url": "data:audio/wav;base64,UklGRqQCAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YYACAACAlKa3w8zQz8m+sJ+Ld2RSQzgyMDM7SFdqfZGktcLL0M/KwLKhjnpmVEU6MjAzOkZVZ3uPorPAys/Py8G0o5F9aVdHOzMwMjlEU2V4jJ+wv8nP0MzDtqaTf2xZSTw0MDE4QlFidYmdrr3IztDNxLioloJuW0s+NTAxNkFPYHOHmqy7x87Qzca6qpiFcV5NPzYxMTU/TV1whJiqucXN0M7HvK2bh3NgT0E3MTA1PUtbboGVqLjEzNDOyL2vnYp2Y1FDODIwNDxJWWt/k6W2w8zQz8m/saCNeWVTRDkyMDM7R1ZofJCjtMHLz8/KwbOij3toVkY6MzAyOUVUZnmNoLLAys/Qy8K1pJJ+alhIPDMwMjhDUmN3i56vvsnP0MzEt6eUgW1aSj00MDE3QVBhdIicrbzHztDNxbmpl4NvXEw+NTAxNkBOX3KFmau6xs3Qzsa7q5mGcl9OQDYxMDU+TFxvg5epucXN0M7IvK6dinZiUUI4MTA0PElZa3+TpbbDzNDPyb+xoIx4ZVNEOTIwMztHVml8kKO0wcvPz8rBs6KPe2dVRjozMDI5RVRmeo6hssDKz9DLwrWk"
+  },
+  "explosion": {
+    "type": "audio",
+    "url": "data:audio/wav;base64,UklGRqQCAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YYACAACAlKa3w8zQz8m+sJ+Ld2RSQzgyMDM7SFdqfZGktcLL0M/KwLKhjnpmVEU6MjAzOkZVZ3uPorPAys/Py8G0o5F9aVdHOzMwMjlEU2V4jJ+wv8nP0MzDtqaTf2xZSTw0MDE4QlFidYmdrr3IztDNxLioloJuW0s+NTAxNkFPYHOHmqy7x87Qzca6qpiFcV5NPzYxMTU/TV1whJiqucXN0M7HvK2bh3NgT0E3MTA1PUtbboGVqLjEzNDOyL2vnYp2Y1FDODIwNDxJWWt/k6W2w8zQz8m/saCNeWVTRDkyMDM7R1ZofJCjtMHLz8/KwbOij3toVkY6MzAyOUVUZnmNoLLAys/Qy8K1pJJ+alhIPDMwMjhDUmN3i56vvsnP0MzEt6eUgW1aSj00MDE3QVBhdIicrbzHztDNxbmpl4NvXEw+NTAxNkBOX3KFmau6xs3Qzsa7q5mGcl9OQDYxMDU+TFxvg5epucXN0M7IvK6ciHVhUEI4MTA0PElZa3+TpbbDzNDPyb+xoIx4ZVNEOTIwMztHVml8kKO0wcvPz8rBs6KPe2dVRjozMDI5RVRmeo6hssDKz9DLwrWk"
+  }
+}
