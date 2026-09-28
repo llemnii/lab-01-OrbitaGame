@@ -23,8 +23,18 @@ export class GameAudio {
   play(name) {
     if (!this.#ready || !this.#context || !this.#buffers[name]) return;
     const source = this.#context.createBufferSource();
+    const gain = this.#context.createGain();
+    const now = this.#context.currentTime;
     source.buffer = this.#buffers[name];
-    source.connect(this.#context.destination);
+    source.playbackRate.value = name === "explosion" ? 0.65 : 1.15;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(name === "explosion" ? 0.1 : 0.06, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      now + (name === "explosion" ? 0.25 : 0.1)
+    );
+    source.connect(gain);
+    gain.connect(this.#context.destination);
     source.start();
   }
 }
