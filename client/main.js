@@ -12,6 +12,7 @@ import { GameAudio } from "./async/audio.js";
 import { Lobby } from "./async/lobby.js";
 import { createHud } from "./async/hud.js";
 import { renderRooms, showScreen } from "./async/dom.js";
+import { GameConnection } from "./connection.js";
 
 const loadingCanvas = document.querySelector("#loading-canvas");
 const loadingText = document.querySelector("#loading-text");
@@ -76,7 +77,10 @@ async function start() {
         selectedRoom.id,
         document.querySelector("#player-name").value || "Гравець"
       );
-      showGame(assets, bus);
+      showGame(assets, bus, {
+        room: selectedRoom.id,
+        name: document.querySelector("#player-name").value || "Гравець"
+      });
     });
     showScreen("lobby");
     lobby.start();
@@ -88,7 +92,7 @@ async function start() {
   }
 }
 
-function showGame(assets, bus) {
+function showGame(assets, bus, player) {
   showScreen("game");
   const canvas = document.querySelector("#game-canvas");
   let arena = resizeCanvas(canvas);
@@ -108,6 +112,33 @@ function showGame(assets, bus) {
   world.spawn(new Pickup(arena.width * 0.7, arena.height * 0.35, "rapid"));
   const renderer = createRenderer(canvas, assets);
   const hud = createHud(bus);
+  const connection = new GameConnection();
+  const chatLog = document.querySelector("#chat-log");
+  const addChat = (line) => {
+    const item = document.createElement("div");
+    item.textContent = line;
+    chatLog.append(item);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  };
+  connection.addEventListener("open", () => {
+    connection.send({ type: "join", room: player.room, name: player.name });
+    chatLog.textContent = "Підключено";
+  });
+  connection.addEventListener("message", (event) => {
+    const data = event.detail;
+    if (data.type === "roster")
+      addChat(`У кімнаті: ${data.players.map((item) => item.name).join(", ")}`);
+    if (data.type === "chat") addChat(`${data.player}: ${data.text}`);
+  });
+  document.querySelector("#chat-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const inputElement = document.querySelector("#chat-input");
+    if (inputElement.value.trim()) {
+      connection.send({ type: "chat", text: inputElement.value.trim() });
+      inputElement.value = "";
+    }
+  });
+  connection.connect();
   const measurement = { time: 0, frames: 0, steps: 0 };
   function update(dt) {
     world.step(dt);

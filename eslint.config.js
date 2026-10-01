@@ -7,11 +7,19 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ["**/*.js"],
+    files: ["client/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       globals: globals.browser
+    }
+  },
+  {
+    files: ["server/**/*.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: globals.node
     }
   }
 ];

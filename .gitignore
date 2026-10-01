@@ -1,2 +1,7 @@
 node_modules
 dist
+client/dist
+server/logs
+logs
+.npm-cache
+.env

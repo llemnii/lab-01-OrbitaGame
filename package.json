@@ -1,24 +1,25 @@
 {
-  "name": "space-ship-canvas-game",
+  "name": "orbita-game-workspace",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint .",
+    "dev": "node server/src/index.js",
+    "dev:client": "npm --workspace client run dev",
+    "build": "npm --workspace client run build",
+    "start": "node server/src/index.js",
+    "test": "npm --workspace client test && npm --workspace server test",
+    "lint": "eslint client server",
     "format:check": "prettier --check .",
-    "format": "prettier --write .",
-    "test": "vitest run"
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
-    "jsdom": "^25.0.0",
-    "prettier": "^3.0.0",
-    "vite": "^7.0.0",
-    "vitest": "^3.0.0"
+    "prettier": "^3.0.0"
   }
 }

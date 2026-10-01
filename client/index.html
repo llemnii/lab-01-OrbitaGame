@@ -152,6 +152,28 @@
         font-size: 14px;
         line-height: 1.5;
       }
+      .chat {
+        margin-top: 14px;
+        padding: 12px;
+        border: 1px solid #3a3f49;
+        border-radius: 5px;
+        background: #191c22;
+      }
+      .chat-log {
+        min-height: 42px;
+        max-height: 120px;
+        overflow: auto;
+        color: #cbd0d8;
+        font-size: 14px;
+      }
+      .chat-form {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .chat-form input {
+        flex: 1;
+      }
       kbd {
         padding: 2px 5px;
         border: 1px solid #5a6372;
@@ -202,6 +224,14 @@
         <kbd>A</kbd>/<kbd>←</kbd> ліворуч, <kbd>D</kbd>/<kbd>→</kbd> праворуч,
         <kbd>Space</kbd> стріляти.
       </p>
+      <section class="chat">
+        <div class="chat-log" id="chat-log">Підключення до кімнати...</div>
+        <form class="chat-form" id="chat-form">
+          <input id="chat-input" maxlength="500" placeholder="Повідомлення" /><button>
+            Надіслати
+          </button>
+        </form>
+      </section>
     </main>
     <script type="module" src="/main.js"></script>
   </body>
