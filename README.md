@@ -250,6 +250,8 @@ npm run format:check
 - У WebSocket можна додати затримку, jitter і втрату пакетів: наприклад `/ws?delay=100&jitter=30&drop=0.02`.
 - Унизу гри є netgraph: RTT, вік snapshot, байти, черга input і величина поправки.
 
+![Два гравці в одній кімнаті](docs/lab-05-two-players.gif)
+
 ### JSON і binary
 
 На невеликому знімку з двома кораблями та кулею вийшло так:
