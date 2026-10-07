@@ -99,7 +99,7 @@ function showGame(assets, bus, player) {
   let arena = resizeCanvas(canvas);
   const input = createInput();
   const world = new World(arena.width, arena.height, input, bus);
-  const ship = world.spawn(new Ship(arena.width / 2, arena.height / 2));
+  const ship = new Ship(arena.width / 2, arena.height / 2);
   world.spawn(new Asteroid(arena.width * 0.25, arena.height * 0.3, 28));
   world.spawn(new Asteroid(arena.width * 0.75, arena.height * 0.65, 22));
   world.spawn(
@@ -171,7 +171,7 @@ function showGame(assets, bus, player) {
     }
   }
   function render(alpha, frameTimeMs, steps) {
-    renderer.render(world, alpha);
+    renderer.render(world, alpha, { skipEntity: ship });
     const context = canvas.getContext("2d");
     context.save();
     context.globalAlpha = 0.7;
@@ -179,13 +179,21 @@ function showGame(assets, bus, player) {
       context.save();
       context.translate(entity.x, entity.y);
       context.rotate(entity.angle);
-      context.fillStyle = entity.id === network.selfId ? "#70e4d4" : "#ffbd69";
-      context.beginPath();
-      context.moveTo(14, 0);
-      context.lineTo(-10, -8);
-      context.lineTo(-10, 8);
-      context.closePath();
-      context.fill();
+      if (entity.kind === 2) {
+        context.fillStyle = "#ffbd69";
+        context.beginPath();
+        context.arc(0, 0, 3, 0, Math.PI * 2);
+        context.fill();
+      } else {
+        context.fillStyle =
+          entity.id === network.selfId ? "#70e4d4" : "#ffbd69";
+        context.beginPath();
+        context.moveTo(14, 0);
+        context.lineTo(-10, -8);
+        context.lineTo(-10, 8);
+        context.closePath();
+        context.fill();
+      }
       context.restore();
     }
     context.restore();

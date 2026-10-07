@@ -130,7 +130,7 @@ export function createRenderer(canvas, assets = {}) {
     context.restore();
   }
 
-  function render(world, alpha) {
+  function render(world, alpha, options = {}) {
     const rect = canvas.getBoundingClientRect();
     const width = rect.width || canvas.width;
     const height = rect.height || canvas.height;
@@ -166,6 +166,7 @@ export function createRenderer(canvas, assets = {}) {
     context.globalAlpha = 1;
 
     for (const entity of world) {
+      if (entity === options.skipEntity) continue;
       if (!entity.alive && entity.kind !== "ship") continue;
       if (entity.kind === "ship") drawShip(entity, safeAlpha);
       else drawEntity(entity, safeAlpha);

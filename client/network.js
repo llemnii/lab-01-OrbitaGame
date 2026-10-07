@@ -64,16 +64,20 @@ export class NetworkGame {
     const previous = this.snapshots.at(-2) ?? current;
     if (!current) return [];
     const entities = current.entities.map((entity) => {
-      const old = previous.entities.find((candidate) => candidate.id === entity.id);
+      const old = previous.entities.find(
+        (candidate) => candidate.id === entity.id && candidate.kind === entity.kind
+      );
       const alpha = old ? 0.5 : 1;
       const targetX = old ? old.x + (entity.x - old.x) * alpha : entity.x;
       const targetY = old ? old.y + (entity.y - old.y) * alpha : entity.y;
-      const previousVisual = this.visual.get(entity.id) ?? { x: targetX, y: targetY };
+      const visualKey = `${entity.kind}:${entity.id}`;
+      const previousVisual =
+        this.visual.get(visualKey) ?? { x: targetX, y: targetY };
       const visual = {
         x: previousVisual.x + (targetX - previousVisual.x) * 0.33,
         y: previousVisual.y + (targetY - previousVisual.y) * 0.33
       };
-      this.visual.set(entity.id, visual);
+      this.visual.set(visualKey, visual);
       return {
         ...entity,
         x: visual.x,
