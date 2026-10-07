@@ -71,8 +71,7 @@ export class NetworkGame {
       const targetX = old ? old.x + (entity.x - old.x) * alpha : entity.x;
       const targetY = old ? old.y + (entity.y - old.y) * alpha : entity.y;
       const visualKey = `${entity.kind}:${entity.id}`;
-      const previousVisual =
-        this.visual.get(visualKey) ?? { x: targetX, y: targetY };
+      const previousVisual = this.visual.get(visualKey) ?? { x: targetX, y: targetY };
       const visual = {
         x: previousVisual.x + (targetX - previousVisual.x) * 0.33,
         y: previousVisual.y + (targetY - previousVisual.y) * 0.33

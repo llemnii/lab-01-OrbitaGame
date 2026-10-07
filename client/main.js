@@ -185,8 +185,7 @@ function showGame(assets, bus, player) {
         context.arc(0, 0, 3, 0, Math.PI * 2);
         context.fill();
       } else {
-        context.fillStyle =
-          entity.id === network.selfId ? "#70e4d4" : "#ffbd69";
+        context.fillStyle = entity.id === network.selfId ? "#70e4d4" : "#ffbd69";
         context.beginPath();
         context.moveTo(14, 0);
         context.lineTo(-10, -8);
