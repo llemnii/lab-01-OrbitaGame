@@ -20,6 +20,15 @@ export function createInput() {
     isDown(key) {
       return keys.has(key.toLowerCase());
     },
+    state() {
+      return {
+        forward: keys.has("w") || keys.has("arrowup"),
+        reverse: keys.has("s") || keys.has("arrowdown"),
+        left: keys.has("a") || keys.has("arrowleft"),
+        right: keys.has("d") || keys.has("arrowright"),
+        fire: keys.has(" ") || keys.has("f")
+      };
+    },
     destroy() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);

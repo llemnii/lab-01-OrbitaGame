@@ -9,11 +9,18 @@ import { RoomManager } from "./rooms.js";
 import { attachSocket } from "./ws.js";
 import { createMatchLog } from "./log/matchlog.js";
 import { replayStream } from "./log/replay.js";
+import { MatchManager } from "./match.js";
 
 const config = readConfig();
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const clientDir = path.join(root, "client", "dist");
 const logs = new Map();
+const matchManagers = new Map();
+function getMatchManager(network) {
+  const key = JSON.stringify(network);
+  if (!matchManagers.has(key)) matchManagers.set(key, new MatchManager(network));
+  return matchManagers.get(key);
+}
 const manager = new RoomManager({
   maxRooms: config.maxRooms,
   logFactory: (id) => {
@@ -125,15 +132,27 @@ const server = createServer((request, response) => {
   });
 });
 const wss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
-wss.on("connection", (socket) =>
-  attachSocket(socket, manager, { maxPlayers: config.maxPlayers })
-);
+wss.on("connection", (socket, request) => {
+  const url = new URL(request.url, `http://${config.host}:${config.port}`);
+  const query = Object.fromEntries(url.searchParams);
+  const codec = query.codec === "json" ? "json" : "binary";
+  const network = {
+    delay: Math.max(0, Number(query.delay ?? process.env.NET_DELAY ?? 0)),
+    jitter: Math.max(0, Number(query.jitter ?? process.env.NET_JITTER ?? 0)),
+    drop: Math.min(1, Math.max(0, Number(query.drop ?? process.env.NET_DROP ?? 0)))
+  };
+  attachSocket(socket, manager, {
+    maxPlayers: config.maxPlayers,
+    matchManager: getMatchManager(network),
+    codec
+  });
+});
 server.on("upgrade", (request, socket, head) => {
   const url = new URL(request.url, `http://${config.host}:${config.port}`);
   if (url.pathname !== "/ws") return socket.destroy();
-  wss.handleUpgrade(request, socket, head, (client) =>
-    wss.emit("connection", client, request)
-  );
+  wss.handleUpgrade(request, socket, head, (client) => {
+    wss.emit("connection", client, request);
+  });
 });
 
 async function shutdown(signal) {

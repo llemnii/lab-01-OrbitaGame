@@ -1,5 +1,5 @@
 export const MAX_MESSAGE_BYTES = 4096;
-const types = new Set(["join", "chat", "leave"]);
+const types = new Set(["join", "chat", "leave", "ping"]);
 
 export function parseMessage(data) {
   const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
@@ -16,6 +16,8 @@ export function parseMessage(data) {
     return { error: "invalid join" };
   if (message.type === "chat" && (!isText(message.text) || message.text.length > 500))
     return { error: "invalid chat" };
+  if (message.type === "ping" && typeof message.t !== "number")
+    return { error: "invalid ping" };
   return { value: message };
 }
 

@@ -1,3 +1,5 @@
+import { decodeSnapshot } from "../shared/src/codec.js";
+
 export class GameConnection extends EventTarget {
   #socket = null;
   #queue = [];
@@ -5,7 +7,7 @@ export class GameConnection extends EventTarget {
   #closed = false;
 
   constructor(
-    url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`
+    url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws?delay=100&jitter=30&drop=0.02`
   ) {
     super();
     this.url = url;
@@ -22,11 +24,19 @@ export class GameConnection extends EventTarget {
       this.#flush();
       this.dispatchEvent(new Event("open"));
     });
-    this.#socket.addEventListener("message", (event) => {
+    this.#socket.binaryType = "arraybuffer";
+    this.#socket.addEventListener("message", async (event) => {
       try {
-        this.dispatchEvent(
-          new CustomEvent("message", { detail: JSON.parse(event.data) })
-        );
+        if (event.data instanceof ArrayBuffer) {
+          this.dispatchEvent(
+            new CustomEvent("snapshot", { detail: decodeSnapshot(event.data) })
+          );
+          return;
+        }
+        const message = JSON.parse(event.data);
+        if (message.type === "snapshot")
+          this.dispatchEvent(new CustomEvent("snapshot", { detail: message }));
+        else this.dispatchEvent(new CustomEvent("message", { detail: message }));
       } catch {
         this.dispatchEvent(new Event("error"));
       }
@@ -44,6 +54,10 @@ export class GameConnection extends EventTarget {
     const data = JSON.stringify(message);
     if (this.#socket?.readyState === WebSocket.OPEN) this.#socket.send(data);
     else this.#queue.push(data);
+  }
+  sendBinary(packet) {
+    if (this.#socket?.readyState === WebSocket.OPEN) this.#socket.send(packet);
+    else this.#queue.push(packet);
   }
   #flush() {
     while (this.#queue.length && this.#socket.bufferedAmount < 64 * 1024)

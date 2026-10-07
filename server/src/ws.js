@@ -1,9 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { jsonMessage, parseMessage } from "./protocol.js";
+import { decodeInput } from "../../shared/src/codec.js";
 
 const CLOSE_BAD_MESSAGE = 1008;
 
-export function attachSocket(socket, manager, { maxPlayers = 8 } = {}) {
+export function attachSocket(
+  socket,
+  manager,
+  { maxPlayers = 8, matchManager, codec = "binary" } = {}
+) {
   const player = { id: randomUUID(), name: "" };
   let room = null;
   let joined = false;
@@ -11,6 +16,7 @@ export function attachSocket(socket, manager, { maxPlayers = 8 } = {}) {
   let pong = true;
   let missedPongs = 0;
   let count = 0;
+  let inputCount = 0;
   let windowStart = Date.now();
 
   const send = (message, critical = true) => {
@@ -39,8 +45,21 @@ export function attachSocket(socket, manager, { maxPlayers = 8 } = {}) {
     if (Date.now() - windowStart >= 1000) {
       windowStart = Date.now();
       count = 0;
+      inputCount = 0;
     }
-    if (++count > 12) return socket.close(CLOSE_BAD_MESSAGE, "rate limit");
+    const isInputPacket = Buffer.isBuffer(raw) && raw.length > 0 && raw[0] === 1;
+    if (isInputPacket) {
+      if (++inputCount > 60) return socket.close(CLOSE_BAD_MESSAGE, "input rate limit");
+    } else if (++count > 12) return socket.close(CLOSE_BAD_MESSAGE, "rate limit");
+    if (isInputPacket) {
+      try {
+        if (!joined) return socket.close(CLOSE_BAD_MESSAGE, "join first");
+        matchManager?.get(room.id).setInput(player.id, decodeInput(raw));
+      } catch (error) {
+        return socket.close(CLOSE_BAD_MESSAGE, error.message);
+      }
+      return;
+    }
     const parsed = parseMessage(raw);
     if (parsed.error) return socket.close(CLOSE_BAD_MESSAGE, parsed.error);
     const message = parsed.value;
@@ -60,8 +79,10 @@ export function attachSocket(socket, manager, { maxPlayers = 8 } = {}) {
         room.on("join", sendRoster);
         room.on("leave", sendRoster);
         room.on("chat", (chat) => send(jsonMessage("chat", chat), false));
+        matchManager?.get(room.id).add(player, socket, codec);
         sendRoster();
       } else if (!joined) socket.close(CLOSE_BAD_MESSAGE, "join first");
+      else if (message.type === "ping") send(jsonMessage("pong", { t: message.t }));
       else if (message.type === "chat") room.chat(player, message.text.trim());
       else if (message.type === "leave") socket.close(1000, "bye");
     } catch (error) {
@@ -72,6 +93,7 @@ export function attachSocket(socket, manager, { maxPlayers = 8 } = {}) {
   socket.on("close", () => {
     clearTimeout(joinTimer);
     clearInterval(heartbeat);
+    if (room) matchManager?.remove(room.id, player.id);
     if (room) room.leave(player);
   });
 }

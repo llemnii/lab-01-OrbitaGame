@@ -13,6 +13,7 @@ import { Lobby } from "./async/lobby.js";
 import { createHud } from "./async/hud.js";
 import { renderRooms, showScreen } from "./async/dom.js";
 import { GameConnection } from "./connection.js";
+import { NetworkGame } from "./network.js";
 
 const loadingCanvas = document.querySelector("#loading-canvas");
 const loadingText = document.querySelector("#loading-text");
@@ -113,6 +114,20 @@ function showGame(assets, bus, player) {
   const renderer = createRenderer(canvas, assets);
   const hud = createHud(bus);
   const connection = new GameConnection();
+  const netStats = {
+    rtt: document.querySelector("#net-rtt"),
+    age: document.querySelector("#net-age"),
+    bytes: document.querySelector("#net-bytes"),
+    pending: document.querySelector("#net-pending"),
+    correction: document.querySelector("#net-correction")
+  };
+  const network = new NetworkGame(connection, 900, 560, (stats) => {
+    netStats.rtt.textContent = `${Math.round(stats.rtt)} мс`;
+    netStats.age.textContent = `${Math.round(stats.age)} мс`;
+    netStats.bytes.textContent = Math.round(stats.bytesIn + stats.bytesOut);
+    netStats.pending.textContent = stats.pending;
+    netStats.correction.textContent = `${stats.correction.toFixed(1)} px`;
+  });
   const chatLog = document.querySelector("#chat-log");
   const addChat = (line) => {
     const item = document.createElement("div");
@@ -140,12 +155,40 @@ function showGame(assets, bus, player) {
   });
   connection.connect();
   const measurement = { time: 0, frames: 0, steps: 0 };
+  let networkTime = 0;
   function update(dt) {
     world.step(dt);
     resolveCollisions(world);
+    networkTime += dt;
+    if (networkTime >= 1 / 30) {
+      networkTime -= 1 / 30;
+      const state = input.state();
+      network.step({
+        thrust: state.forward ? 1 : state.reverse ? -1 : 0,
+        turn: state.right ? 1 : state.left ? -1 : 0,
+        fire: state.fire
+      });
+    }
   }
   function render(alpha, frameTimeMs, steps) {
     renderer.render(world, alpha);
+    const context = canvas.getContext("2d");
+    context.save();
+    context.globalAlpha = 0.7;
+    for (const entity of network.renderEntities()) {
+      context.save();
+      context.translate(entity.x, entity.y);
+      context.rotate(entity.angle);
+      context.fillStyle = entity.id === network.selfId ? "#70e4d4" : "#ffbd69";
+      context.beginPath();
+      context.moveTo(14, 0);
+      context.lineTo(-10, -8);
+      context.lineTo(-10, 8);
+      context.closePath();
+      context.fill();
+      context.restore();
+    }
+    context.restore();
     measurement.time += frameTimeMs / 1000;
     measurement.frames += 1;
     measurement.steps += steps;
