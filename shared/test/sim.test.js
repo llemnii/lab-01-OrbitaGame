@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addShip, createWorld, stepWorld } from "../src/sim.js";
+import { addShip, createWorld, stepWorld } from "../src/sim.ts";
 
 describe("shared simulation", () => {
   it("gives the same state for the same seed and inputs", () => {

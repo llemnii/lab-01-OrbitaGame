@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readConfig } from "../src/config.js";
+import { readConfig } from "../src/config.ts";
 
 test("config validates the port and resolves log directory", () => {
   const config = readConfig({ PORT: "9000", HOST: "localhost", LOG_DIR: "tmp-logs" });

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Room } from "../src/rooms.js";
+import { Room } from "../src/rooms.ts";
 
 test("room emits join, chat and removes a player on leave", () => {
   const events = [];

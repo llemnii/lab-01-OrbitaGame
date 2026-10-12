@@ -12,8 +12,8 @@ import { GameAudio } from "./async/audio.js";
 import { Lobby } from "./async/lobby.js";
 import { createHud } from "./async/hud.js";
 import { renderRooms, showScreen } from "./async/dom.js";
-import { GameConnection } from "./connection.js";
-import { NetworkGame } from "./network.js";
+import { GameConnection } from "./connection.ts";
+import { NetworkGame } from "./network.ts";
 
 const loadingCanvas = document.querySelector("#loading-canvas");
 const loadingText = document.querySelector("#loading-text");
@@ -179,7 +179,7 @@ function showGame(assets, bus, player) {
       context.save();
       context.translate(entity.x, entity.y);
       context.rotate(entity.angle);
-      if (entity.kind === 2) {
+      if (entity.kind === "bullet") {
         context.fillStyle = "#ffbd69";
         context.beginPath();
         context.arc(0, 0, 3, 0, Math.PI * 2);

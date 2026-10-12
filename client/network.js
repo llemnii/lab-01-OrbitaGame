@@ -1,5 +1,5 @@
-import { encodeInput } from "../shared/src/codec.js";
-import { addShip, createWorld, SIM_DT, stepWorld } from "../shared/src/sim.js";
+import { encodeInput } from "../shared/src/codec.ts";
+import { addShip, createWorld, SIM_DT, stepWorld } from "../shared/src/sim.ts";
 
 export class NetworkGame {
   constructor(connection, width, height, onStats = () => {}) {
@@ -43,7 +43,7 @@ export class NetworkGame {
     const next = createWorld(20261007, this.state.width, this.state.height);
     next.tick = serverSnapshot.tick;
     for (const entity of serverSnapshot.entities) {
-      if (entity.kind === 1) next.ships[entity.id] = { ...entity, vx: 0, vy: 0 };
+      if (entity.kind === "ship") next.ships[entity.id] = { ...entity, vx: 0, vy: 0 };
       else next.bullets.push({ ...entity, vx: 0, vy: 0 });
     }
     this.pending = this.pending.filter(

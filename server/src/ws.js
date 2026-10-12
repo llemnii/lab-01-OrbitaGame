@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { jsonMessage, parseMessage } from "./protocol.js";
-import { decodeInput } from "../../shared/src/codec.js";
+import { jsonMessage, parseMessage } from "./protocol.ts";
+import { decodeInput } from "../../shared/src/codec.ts";
 
 const CLOSE_BAD_MESSAGE = 1008;
 

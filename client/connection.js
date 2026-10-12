@@ -1,4 +1,4 @@
-import { decodeSnapshot } from "../shared/src/codec.js";
+import { decodeSnapshot } from "../shared/src/codec.ts";
 
 export class GameConnection extends EventTarget {
   #socket = null;

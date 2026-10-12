@@ -4,8 +4,8 @@ import {
   SIM_DT,
   snapshot,
   stepWorld
-} from "../../shared/src/sim.js";
-import { encodeSnapshot } from "../../shared/src/codec.js";
+} from "../../shared/src/sim.ts";
+import { encodeSnapshot } from "../../shared/src/codec.ts";
 
 export class Match {
   constructor({ roomId, width = 900, height = 560, network = {} }) {

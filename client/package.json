@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --configLoader runner",
     "build": "vite build --configLoader runner",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "vite preview",
     "lint": "eslint .",
     "format:check": "prettier --check .",

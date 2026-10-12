@@ -4,7 +4,7 @@ import {
   decodeSnapshot,
   encodeInput,
   encodeSnapshot
-} from "../src/codec.js";
+} from "../src/codec.ts";
 
 describe("binary protocol", () => {
   it("round trips an input in little-endian format", () => {
