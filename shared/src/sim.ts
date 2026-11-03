@@ -6,6 +6,7 @@ import {
   type InputMessage,
   type SnapshotEntity
 } from "./types.ts";
+import { ObjectPool } from "./pool.ts";
 
 export const SIM_HZ = 30;
 export const SIM_DT = 1 / SIM_HZ;
@@ -41,6 +42,7 @@ export type World = {
   ships: Record<number, ShipState>;
   bullets: BulletState[];
   nextBullet: number;
+  bulletPool: ObjectPool<BulletState>;
 };
 
 export function mulberry32(seed: number): () => number {
@@ -54,7 +56,29 @@ export function mulberry32(seed: number): () => number {
 }
 
 export function createWorld(seed = 1, width = 900, height = 560): World {
-  return { seed, width, height, tick: 0, ships: {}, bullets: [], nextBullet: 1 };
+  const bulletPool = new ObjectPool<BulletState>(() => ({
+    id: asEntityId(0),
+    kind: "bullet",
+    owner: asEntityId(0),
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    angle: 0,
+    hp: 0
+  }));
+  const world: World = {
+    seed,
+    width,
+    height,
+    tick: 0,
+    ships: {},
+    bullets: [],
+    nextBullet: 1,
+    bulletPool
+  };
+  Object.defineProperty(world, "bulletPool", { enumerable: false, value: bulletPool });
+  return world;
 }
 
 export function addShip(world: World, id: number, index = 0): ShipState {
@@ -94,9 +118,9 @@ export function applyInput(
   ship.x = (ship.x + ship.vx * dt + world.width) % world.width;
   ship.y = (ship.y + ship.vy * dt + world.height) % world.height;
   if (input.fire && world.tick % 7 === 0) {
-    world.bullets.push({
+    const bullet = world.bulletPool.acquire();
+    Object.assign(bullet, {
       id: asEntityId(world.nextBullet++),
-      kind: "bullet",
       owner: ship.id,
       x: ship.x + Math.cos(ship.angle) * 24,
       y: ship.y + Math.sin(ship.angle) * 24,
@@ -105,6 +129,7 @@ export function applyInput(
       angle: ship.angle,
       hp: 1
     });
+    world.bullets.push(bullet);
   }
 }
 
@@ -122,7 +147,12 @@ export function stepWorld(
     bullet.y = (bullet.y + bullet.vy * dt + world.height) % world.height;
     bullet.hp -= dt;
   }
-  world.bullets = world.bullets.filter((bullet) => bullet.hp > 0);
+  const activeBullets: BulletState[] = [];
+  for (const bullet of world.bullets) {
+    if (bullet.hp > 0) activeBullets.push(bullet);
+    else world.bulletPool.release(bullet);
+  }
+  world.bullets = activeBullets;
   world.tick += 1;
   return world;
 }

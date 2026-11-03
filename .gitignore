@@ -6,3 +6,7 @@ server/logs
 logs
 .npm-cache
 .env
+coverage
+test-results
+client/package-lock.json
+shared/package-lock.json
