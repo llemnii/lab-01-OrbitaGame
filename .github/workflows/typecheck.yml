@@ -14,3 +14,9 @@ jobs:
           node-version: 24
       - run: npm install
       - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:coverage
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

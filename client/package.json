@@ -11,10 +11,12 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run --configLoader runner"
+    "test": "vitest run --config vitest.config.js --configLoader runner",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.64.1",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "jsdom": "^25.0.0",
