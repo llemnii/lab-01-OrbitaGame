@@ -100,6 +100,7 @@ function showGame(assets, bus, player) {
   const input = createInput();
   const world = new World(arena.width, arena.height, input, bus);
   const ship = new Ship(arena.width / 2, arena.height / 2);
+  world.spawn(ship);
   world.spawn(new Asteroid(arena.width * 0.25, arena.height * 0.3, 28));
   world.spawn(new Asteroid(arena.width * 0.75, arena.height * 0.65, 22));
   world.spawn(
