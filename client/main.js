@@ -172,12 +172,18 @@ function showGame(assets, bus, player) {
     }
   }
   function render(alpha, frameTimeMs, steps) {
-    renderer.render(world, alpha);
+    const networkEntities = network.renderEntities();
+    renderer.render(world, alpha, {
+      skipEntity: networkEntities.some(
+        (entity) => entity.kind === "ship" && entity.id === network.selfId
+      )
+        ? ship
+        : null
+    });
     const context = canvas.getContext("2d");
     context.save();
     context.globalAlpha = 0.7;
-    for (const entity of network.renderEntities()) {
-      if (entity.kind === "ship" && entity.id === network.selfId) continue;
+    for (const entity of networkEntities) {
       context.save();
       context.translate(entity.x, entity.y);
       context.rotate(entity.angle);
