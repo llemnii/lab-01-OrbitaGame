@@ -82,7 +82,13 @@ export class NetworkGame {
     next.tick = serverSnapshot.tick;
     for (const entity of serverSnapshot.entities) {
       if (entity.kind === "ship") next.ships[entity.id] = { ...entity, vx: 0, vy: 0 };
-      else next.bullets.push({ ...entity, vx: 0, vy: 0, owner: entity.id });
+      else
+        next.bullets.push({
+          ...entity,
+          vx: 0,
+          vy: 0,
+          owner: entity.owner ?? entity.id
+        });
     }
     const firstUnacked = this.pending.findIndex(
       (item) => Number(item.seq) > serverSnapshot.lastProcessedSeq

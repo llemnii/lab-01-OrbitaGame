@@ -35,6 +35,7 @@ export type ShipSnapshot = {
 export type BulletSnapshot = {
   readonly kind: "bullet";
   readonly id: EntityId;
+  readonly owner?: EntityId;
   readonly x: number;
   readonly y: number;
   readonly angle: number;

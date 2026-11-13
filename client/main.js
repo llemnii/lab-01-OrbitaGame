@@ -99,7 +99,6 @@ function showGame(assets, bus, player) {
   let arena = resizeCanvas(canvas);
   const input = createInput();
   const world = new World(arena.width, arena.height, input, bus);
-  world.networked = true;
   const ship = new Ship(arena.width / 2, arena.height / 2);
   world.spawn(ship);
   world.spawn(new Asteroid(arena.width * 0.25, arena.height * 0.3, 28));
@@ -180,12 +179,13 @@ function showGame(assets, bus, player) {
       )
         ? ship
         : null,
-      skipKinds: new Set(["bullet"])
+      skipKinds: undefined
     });
     const context = canvas.getContext("2d");
     context.save();
     context.globalAlpha = 0.7;
     for (const entity of networkEntities) {
+      if (entity.kind === "bullet" && entity.owner === network.selfId) continue;
       context.save();
       context.translate(entity.x, entity.y);
       context.rotate(entity.angle);

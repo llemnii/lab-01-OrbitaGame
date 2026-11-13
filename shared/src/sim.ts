@@ -174,6 +174,7 @@ export function snapshot(
     entities: [...Object.values(world.ships), ...world.bullets].map((entity) => ({
       id: entity.id,
       kind: entity.kind,
+      ...(entity.kind === "bullet" ? { owner: entity.owner } : {}),
       x: entity.x,
       y: entity.y,
       angle: entity.angle,

@@ -49,7 +49,7 @@ export class Ship extends Entity {
     this.fireCooldown -= dt;
     this.shieldTime = Math.max(0, this.shieldTime - dt);
     this.rapidTime = Math.max(0, this.rapidTime - dt);
-    if (!world.networked && (input.isDown(" ") || input.isDown("f")) && this.fireCooldown <= 0) {
+    if ((input.isDown(" ") || input.isDown("f")) && this.fireCooldown <= 0) {
       const bullet = this.fire();
       world.spawn(bullet);
       world.bus?.dispatchEvent(new CustomEvent("fired", { detail: { bullet } }));

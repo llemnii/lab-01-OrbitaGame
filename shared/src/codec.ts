@@ -67,6 +67,7 @@ export function encodeSnapshot(snapshot: WireSnapshot): ArrayBuffer {
     view.setFloat32(offset + 7, entity.y, true);
     view.setInt16(offset + 11, Math.round(entity.angle * 1000), true);
     view.setUint8(offset + 13, Math.max(0, Math.min(255, entity.hp)));
+    view.setUint16(offset + 14, entity.kind === "bullet" ? Number(entity.owner) : 0, true);
   });
   return buffer;
 }
@@ -92,7 +93,8 @@ export function decodeSnapshot(buffer: ArrayBuffer): WireSnapshot {
       x: view.getFloat32(offset + 3, true),
       y: view.getFloat32(offset + 7, true),
       angle: view.getInt16(offset + 11, true) / 1000,
-      hp: view.getUint8(offset + 13)
+      hp: view.getUint8(offset + 13),
+      ...(rawKind === 2 ? { owner: asEntityId(view.getUint16(offset + 14, true)) } : {})
     });
   }
   return {
