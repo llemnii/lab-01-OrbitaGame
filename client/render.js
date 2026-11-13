@@ -167,6 +167,7 @@ export function createRenderer(canvas, assets = {}) {
 
     for (const entity of world) {
       if (entity === options.skipEntity) continue;
+      if (options.skipKinds?.has(entity.kind)) continue;
       if (!entity.alive && entity.kind !== "ship") continue;
       if (entity.kind === "ship") drawShip(entity, safeAlpha);
       else drawEntity(entity, safeAlpha);

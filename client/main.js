@@ -173,12 +173,14 @@ function showGame(assets, bus, player) {
   }
   function render(alpha, frameTimeMs, steps) {
     const networkEntities = network.renderEntities();
+    const hasNetworkSnapshot = networkEntities.length > 0;
     renderer.render(world, alpha, {
       skipEntity: networkEntities.some(
         (entity) => entity.kind === "ship" && entity.id === network.selfId
       )
         ? ship
-        : null
+        : null,
+      skipKinds: hasNetworkSnapshot ? new Set(["bullet"]) : undefined
     });
     const context = canvas.getContext("2d");
     context.save();
