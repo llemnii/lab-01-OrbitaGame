@@ -35,11 +35,14 @@ export class GameConnection extends EventTarget {
       (event: MessageEvent<string | ArrayBuffer>) => {
         try {
           if (event.data instanceof ArrayBuffer) {
-            this.dispatchEvent(
-              new CustomEvent<WireSnapshot>("snapshot", {
-                detail: decodeSnapshot(event.data)
-              })
-            );
+            this.#emitSnapshot(event.data);
+            return;
+          }
+          if (typeof Blob !== "undefined" && event.data instanceof Blob) {
+            void event.data
+              .arrayBuffer()
+              .then((buffer) => this.#emitSnapshot(buffer))
+              .catch(() => this.dispatchEvent(new Event("error")));
             return;
           }
           const message: unknown = JSON.parse(event.data);
@@ -64,6 +67,18 @@ export class GameConnection extends EventTarget {
         setTimeout(() => this.#open(), delay);
       }
     });
+  }
+
+  #emitSnapshot(buffer: ArrayBuffer): void {
+    try {
+      this.dispatchEvent(
+        new CustomEvent<WireSnapshot>("snapshot", {
+          detail: decodeSnapshot(buffer)
+        })
+      );
+    } catch {
+      this.dispatchEvent(new Event("error"));
+    }
   }
 
   send(message: JsonMessage): void {
