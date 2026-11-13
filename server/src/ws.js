@@ -7,7 +7,7 @@ const CLOSE_BAD_MESSAGE = 1008;
 export function attachSocket(
   socket,
   manager,
-  { maxPlayers = 8, matchManager, codec = "binary" } = {}
+  { maxPlayers = 8, matchManager, codec = "binary", metrics, logger } = {}
 ) {
   const player = { id: randomUUID(), name: "" };
   let room = null;
@@ -42,6 +42,7 @@ export function attachSocket(
   }, 15000);
 
   socket.on("message", (raw) => {
+    metrics?.message(raw.length ?? 0);
     if (Date.now() - windowStart >= 1000) {
       windowStart = Date.now();
       count = 0;
@@ -74,6 +75,7 @@ export function attachSocket(
         });
         player.name = name;
         room.join(player);
+        logger?.info("player joined", { roomId: room.id, playerId: player.id });
         joined = true;
         clearTimeout(joinTimer);
         room.on("join", sendRoster);
@@ -95,5 +97,6 @@ export function attachSocket(
     clearInterval(heartbeat);
     if (room) matchManager?.remove(room.id, player.id);
     if (room) room.leave(player);
+    if (room) logger?.info("player left", { roomId: room.id, playerId: player.id });
   });
 }

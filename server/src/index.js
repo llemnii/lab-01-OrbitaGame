@@ -10,15 +10,23 @@ import { attachSocket } from "./ws.js";
 import { createMatchLog } from "./log/matchlog.js";
 import { replayStream } from "./log/replay.js";
 import { MatchManager } from "./match.js";
+import { createLogger, createMetrics } from "./observability.js";
 
 const config = readConfig();
+const logger = createLogger(config.logLevel);
+const metrics = createMetrics();
+let accepting = true;
+const connectionsByIp = new Map();
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const clientDir = path.join(root, "client", "dist");
 const logs = new Map();
 const matchManagers = new Map();
 function getMatchManager(network) {
   const key = JSON.stringify(network);
-  if (!matchManagers.has(key)) matchManagers.set(key, new MatchManager(network));
+  if (!matchManagers.has(key)) {
+    const managerForNetwork = new MatchManager(network, (duration) => metrics.tick(duration));
+    matchManagers.set(key, managerForNetwork);
+  }
   return matchManagers.get(key);
 }
 const manager = new RoomManager({
@@ -73,7 +81,18 @@ async function staticFile(response, pathname) {
 
 async function handler(request, response) {
   const url = new URL(request.url, `http://${config.host}:${config.port}`);
-  if (url.pathname === "/health") return response.end(JSON.stringify({ ok: true }));
+  if (url.pathname === "/health") {
+    response.writeHead(200, { "content-type": "application/json" });
+    return response.end(JSON.stringify({ ok: true, sha: config.buildSha }));
+  }
+  if (url.pathname === "/ready") {
+    response.writeHead(accepting ? 200 : 503, { "content-type": "application/json" });
+    return response.end(JSON.stringify({ ready: accepting, sha: config.buildSha }));
+  }
+  if (url.pathname === "/metrics") {
+    response.writeHead(200, { "content-type": "text/plain; version=0.0.4" });
+    return response.end(metrics.prometheus({ players: [...wss.clients].length, rooms: manager.rooms.size }));
+  }
   if (url.pathname === "/api/rooms" && request.method === "GET") {
     response.writeHead(200, { "content-type": "application/json" });
     return response.end(JSON.stringify(manager.list()));
@@ -133,6 +152,12 @@ const server = createServer((request, response) => {
 });
 const wss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
 wss.on("connection", (socket, request) => {
+  const ip = request.socket.remoteAddress ?? "unknown";
+  connectionsByIp.set(ip, (connectionsByIp.get(ip) ?? 0) + 1);
+  socket.once("close", () => {
+    const count = (connectionsByIp.get(ip) ?? 1) - 1;
+    if (count <= 0) connectionsByIp.delete(ip); else connectionsByIp.set(ip, count);
+  });
   const url = new URL(request.url, `http://${config.host}:${config.port}`);
   const query = Object.fromEntries(url.searchParams);
   const codec = query.codec === "json" ? "json" : "binary";
@@ -144,26 +169,40 @@ wss.on("connection", (socket, request) => {
   attachSocket(socket, manager, {
     maxPlayers: config.maxPlayers,
     matchManager: getMatchManager(network),
-    codec
+    codec,
+    metrics,
+    logger,
+    accepting
   });
 });
 server.on("upgrade", (request, socket, head) => {
+  if (!accepting) return socket.destroy();
   const url = new URL(request.url, `http://${config.host}:${config.port}`);
   if (url.pathname !== "/ws") return socket.destroy();
+  const origin = request.headers.origin;
+  if (origin && !config.allowedOrigins.includes(origin)) return socket.destroy();
+  const ip = request.socket.remoteAddress ?? "unknown";
+  if ((connectionsByIp.get(ip) ?? 0) >= config.maxConnectionsPerIp) return socket.destroy();
   wss.handleUpgrade(request, socket, head, (client) => {
     wss.emit("connection", client, request);
   });
 });
 
 async function shutdown(signal) {
-  console.log(`${signal}: shutting down`);
+  if (!accepting) return;
+  accepting = false;
+  logger.info("server shutting down", { signal });
+  for (const socket of wss.clients) {
+    if (socket.readyState === 1) socket.send(JSON.stringify({ type: "shutdown" }));
+  }
   for (const log of logs.values()) await log.close();
   for (const socket of wss.clients) socket.close(1001, "server shutdown");
   wss.close();
   server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 9000).unref();
 }
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 server.listen(config.port, config.host, () =>
-  console.log(`server listening on http://${config.host}:${config.port}`)
+  logger.info("server listening", { host: config.host, port: config.port, sha: config.buildSha })
 );

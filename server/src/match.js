@@ -56,6 +56,7 @@ export class Match {
 
   tick() {
     if (!this.running) return;
+    const started = performance.now();
     const inputs = {};
     for (const client of this.clients.values()) inputs[client.id] = client.input;
     stepWorld(this.world, inputs, SIM_DT);
@@ -68,6 +69,7 @@ export class Match {
       this.send(client.socket, packet);
     }
     this.nextTickAt += SIM_DT * 1000;
+    this.onTick?.(performance.now() - started);
     if (this.nextTickAt < performance.now() - 1000)
       this.nextTickAt = performance.now() + SIM_DT * 1000;
     this.schedule();
@@ -89,14 +91,18 @@ export class Match {
 }
 
 export class MatchManager {
-  constructor(network = {}) {
+  constructor(network = {}, onTick = null) {
     this.network = network;
+    this.onTick = onTick;
     this.matches = new Map();
   }
 
   get(roomId) {
-    if (!this.matches.has(roomId))
-      this.matches.set(roomId, new Match({ roomId, network: this.network }));
+    if (!this.matches.has(roomId)) {
+      const match = new Match({ roomId, network: this.network });
+      match.onTick = this.onTick;
+      this.matches.set(roomId, match);
+    }
     return this.matches.get(roomId);
   }
 

@@ -1,0 +1,14 @@
+services:
+  game:
+    build:
+      context: .
+      args:
+        BUILD_SHA: ${BUILD_SHA:-dev}
+    ports:
+      - "8787:8787"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+      BUILD_SHA: ${BUILD_SHA:-dev}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8787,http://127.0.0.1:8787}
+    stop_grace_period: 10s
