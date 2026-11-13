@@ -171,7 +171,11 @@ function showGame(assets, bus, player) {
     }
   }
   function render(alpha, frameTimeMs, steps) {
-    renderer.render(world, alpha, { skipEntity: ship });
+    // Until the first server snapshot arrives, keep showing the local ship.
+    // Otherwise a slow connection makes the arena look empty.
+    renderer.render(world, alpha, {
+      skipEntity: network.selfId === undefined ? undefined : ship
+    });
     const context = canvas.getContext("2d");
     context.save();
     context.globalAlpha = 0.7;
