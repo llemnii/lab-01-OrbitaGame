@@ -7,7 +7,7 @@ export class GameConnection extends EventTarget {
   #closed = false;
 
   constructor(
-    url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws?codec=json&delay=100&jitter=30&drop=0.02`
+    url = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws?codec=json`
   ) {
     super();
     this.url = url;
