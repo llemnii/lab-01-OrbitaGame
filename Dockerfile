@@ -9,7 +9,7 @@ COPY client client
 COPY server server
 COPY shared shared
 COPY eslint.config.js .prettierrc ./
-RUN pnpm --filter client build
+RUN pnpm --dir client run build
 
 FROM node:24-alpine AS runtime
 ARG BUILD_SHA=unknown
