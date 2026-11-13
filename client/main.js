@@ -181,6 +181,13 @@ function showGame(assets, bus, player) {
       context.save();
       context.translate(entity.x, entity.y);
       context.rotate(entity.angle);
+      if (entity.kind === "ship" && assets.ship) {
+        context.shadowColor = "#70e4d4";
+        context.shadowBlur = 16;
+        context.drawImage(assets.ship, 0, 0, 64, 64, -32, -32, 64, 64);
+        context.restore();
+        continue;
+      }
       if (entity.kind === "bullet") {
         context.fillStyle = "#ffbd69";
         context.beginPath();
