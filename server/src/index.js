@@ -38,8 +38,12 @@ const manager = new RoomManager({
   }
 });
 
-manager.getOrCreate({ id: "quiet", name: "Тиха орбіта", limit: 4 });
-manager.getOrCreate({ id: "training", name: "Тренування", limit: 2 });
+function ensureDefaultRooms() {
+  manager.getOrCreate({ id: "quiet", name: "Тиха орбіта", limit: 4 });
+  manager.getOrCreate({ id: "training", name: "Тренування", limit: 2 });
+}
+
+ensureDefaultRooms();
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -94,6 +98,7 @@ async function handler(request, response) {
     return response.end(metrics.prometheus({ players: [...wss.clients].length, rooms: manager.rooms.size }));
   }
   if (url.pathname === "/api/rooms" && request.method === "GET") {
+    ensureDefaultRooms();
     response.writeHead(200, { "content-type": "application/json" });
     return response.end(JSON.stringify(manager.list()));
   }
